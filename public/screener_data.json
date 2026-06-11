@@ -1,0 +1,74 @@
+[
+  {
+    "symbol": "AAPL",
+    "price": 185.3,
+    "changePct": 1.2,
+    "sma20": 180.5,
+    "sma50": 178.2,
+    "rsi14": 58.4,
+    "macdHist": 0.45,
+    "volume": 52000000,
+    "avgVol20": 48000000,
+    "updatedAt": "2026-06-11 16:00:00"
+  },
+  {
+    "symbol": "NVDA",
+    "price": 950.4,
+    "changePct": 3.4,
+    "sma20": 900.1,
+    "sma50": 850.5,
+    "rsi14": 72.1,
+    "macdHist": 5.2,
+    "volume": 45000000,
+    "avgVol20": 40000000,
+    "updatedAt": "2026-06-11 16:00:00"
+  },
+  {
+    "symbol": "MSFT",
+    "price": 415.2,
+    "changePct": -0.5,
+    "sma20": 420.0,
+    "sma50": 410.5,
+    "rsi14": 45.2,
+    "macdHist": -1.2,
+    "volume": 22000000,
+    "avgVol20": 25000000,
+    "updatedAt": "2026-06-11 16:00:00"
+  },
+  {
+    "symbol": "TSLA",
+    "price": 175.6,
+    "changePct": -2.1,
+    "sma20": 180.5,
+    "sma50": 190.2,
+    "rsi14": 38.5,
+    "macdHist": -2.5,
+    "volume": 85000000,
+    "avgVol20": 90000000,
+    "updatedAt": "2026-06-11 16:00:00"
+  },
+  {
+    "symbol": "AMD",
+    "price": 160.5,
+    "changePct": 2.5,
+    "sma20": 155.0,
+    "sma50": 165.2,
+    "rsi14": 52.4,
+    "macdHist": 1.1,
+    "volume": 65000000,
+    "avgVol20": 60000000,
+    "updatedAt": "2026-06-11 16:00:00"
+  },
+  {
+    "symbol": "PLTR",
+    "price": 24.5,
+    "changePct": 5.2,
+    "sma20": 22.1,
+    "sma50": 23.5,
+    "rsi14": 65.2,
+    "macdHist": 0.8,
+    "volume": 35000000,
+    "avgVol20": 30000000,
+    "updatedAt": "2026-06-11 16:00:00"
+  }
+]

@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { useStore, ScreenerRule } from '../store';
-import { Filter, Play, Plus, Trash2, SlidersHorizontal } from 'lucide-react';
+import { Filter, Play, Plus, Trash2, SlidersHorizontal, Eye } from 'lucide-react';
 
 export default function StockScreener() {
-  const { screenerRules, addScreenerRule, removeScreenerRule } = useStore();
+  const { screenerRules, addScreenerRule, removeScreenerRule, setSelectedSymbol, addToWatchlist } = useStore();
   const [isScanning, setIsScanning] = useState(false);
-  const [results, setResults] = useState<{symbol: string, score: number}[]>([]);
+  const [results, setResults] = useState<any[]>([]);
+  const [scannedAt, setScannedAt] = useState<string | null>(null);
   
-  const [newIndicator, setNewIndicator] = useState('SMA20');
+  const [newIndicator, setNewIndicator] = useState('PRICE');
   const [newOperator, setNewOperator] = useState('>');
-  const [newValue, setNewValue] = useState('SMA50');
+  const [newValue, setNewValue] = useState('SMA20');
 
   const handleAddRule = () => {
     addScreenerRule({
@@ -20,26 +21,58 @@ export default function StockScreener() {
     });
   };
 
-  const handleScan = () => {
+  const evaluateRule = (stock: any, rule: ScreenerRule) => {
+    const leftValue = stock[rule.indicator.toLowerCase()] ?? stock[rule.indicator];
+    if (leftValue === undefined) return false;
+
+    // Check if right side is a number or another indicator
+    let rightValue = Number(rule.value);
+    if (isNaN(rightValue)) {
+      // It's another indicator string (e.g. SMA50)
+      rightValue = stock[rule.value.toLowerCase()] ?? stock[rule.value];
+      if (rightValue === undefined) return false;
+    }
+
+    switch (rule.operator) {
+      case '>': return leftValue > rightValue;
+      case '<': return leftValue < rightValue;
+      case '=': return leftValue === rightValue;
+      default: return false; // Cross up/down requires historical data array, skipped for simplicity
+    }
+  };
+
+  const handleScan = async () => {
     setIsScanning(true);
-    // Simulate a scan delay
-    setTimeout(() => {
-      // Mock results since real full-market scanning requires backend aggregation
-      const mockResults = ['NVDA', 'AMD', 'PLTR', 'SMCI', 'TSLA'].map(sym => ({
-        symbol: sym,
-        score: Math.floor(Math.random() * 100)
-      })).sort((a, b) => b.score - a.score);
+    try {
+      // Fetch the generated data from our python script
+      const res = await fetch('/QuantTrader/screener_data.json').catch(() => fetch('/screener_data.json'));
+      const data = await res.json();
       
-      setResults(mockResults);
-      setIsScanning(false);
-    }, 1500);
+      const filtered = data.filter((stock: any) => {
+        // Must pass all rules
+        return screenerRules.every(rule => evaluateRule(stock, rule));
+      });
+
+      setResults(filtered);
+      if (data.length > 0) {
+        setScannedAt(data[0].updatedAt);
+      }
+    } catch (e) {
+      console.error("Failed to fetch screener data", e);
+    }
+    setIsScanning(false);
+  };
+
+  const handleSelect = (symbol: string) => {
+    setSelectedSymbol(symbol);
+    addToWatchlist(symbol);
   };
 
   return (
     <div className="bento-card h-full flex flex-col bg-slate-900 border-slate-800">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-          <Filter size={14} /> Stock Screener
+          <Filter size={14} /> Market Screener
         </h2>
         <button 
           onClick={handleScan}
@@ -88,19 +121,17 @@ export default function StockScreener() {
             <option value="SMA20">SMA (20)</option>
             <option value="SMA50">SMA (50)</option>
             <option value="RSI14">RSI (14)</option>
-            <option value="MACD">MACD</option>
+            <option value="MACDHIST">MACD Hist</option>
             <option value="VOLUME">VOLUME</option>
           </select>
           <select 
             value={newOperator}
             onChange={(e) => setNewOperator(e.target.value)}
-            className="w-12 bg-slate-900 border border-slate-700 rounded text-xs p-1.5 outline-none focus:border-emerald-500 text-center font-bold text-slate-400"
+            className="w-10 bg-slate-900 border border-slate-700 rounded text-xs p-1.5 outline-none focus:border-emerald-500 text-center font-bold text-slate-400"
           >
             <option value=">">&gt;</option>
             <option value="<">&lt;</option>
             <option value="=">=</option>
-            <option value="CROSS_UP">x↑</option>
-            <option value="CROSS_DN">x↓</option>
           </select>
           <input 
             type="text"
@@ -118,24 +149,31 @@ export default function StockScreener() {
         </div>
 
         {/* Scan Results */}
-        <div className="mt-4 flex-1 overflow-y-auto custom-scrollbar">
+        <div className="mt-2 flex-1 overflow-y-auto custom-scrollbar">
           {results.length > 0 && (
             <div className="space-y-1">
-              <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1">
-                <SlidersHorizontal size={10} /> Scan Results ({results.length} matches)
+              <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 flex justify-between items-center">
+                <span className="flex items-center gap-1"><SlidersHorizontal size={10} /> {results.length} matches found</span>
+                {scannedAt && <span>Data: {scannedAt}</span>}
               </div>
               {results.map((res, i) => (
-                <div key={i} className="flex justify-between items-center p-2 text-xs rounded hover:bg-slate-800/50 group border border-transparent hover:border-slate-800 transition-colors">
-                  <span className="font-bold tracking-wide text-slate-200">{res.symbol}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500" style={{ width: `${res.score}%` }}></div>
-                    </div>
-                    <span className="font-mono text-[10px] text-slate-400 w-6 text-right">{res.score}</span>
+                <div key={i} className="flex justify-between items-center p-2 text-xs rounded hover:bg-slate-800/50 group border border-slate-800/50 hover:border-slate-700 transition-colors bg-slate-950/30">
+                  <div className="flex flex-col">
+                    <span className="font-bold tracking-wide text-emerald-400">{res.symbol}</span>
+                    <span className="text-[9px] text-slate-500 font-mono">${res.price} ({res.changePct}%)</span>
                   </div>
+                  <button 
+                    onClick={() => handleSelect(res.symbol)}
+                    className="flex items-center gap-1 px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px] text-slate-300 transition-colors"
+                  >
+                    <Eye size={10} /> View
+                  </button>
                 </div>
               ))}
             </div>
+          )}
+          {results.length === 0 && !isScanning && scannedAt && (
+             <div className="text-xs text-slate-500 text-center mt-4">No stocks matched your criteria.</div>
           )}
         </div>
       </div>

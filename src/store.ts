@@ -14,6 +14,12 @@ export interface ScreenerRule {
   value: string;     // e.g. 'SMA50', '30', '50.0'
 }
 
+export interface RiskControls {
+  maxPosPct: number;
+  dailyLossLimit: number;
+  maxDrawdownLimit: number;
+}
+
 interface AppState {
   alpacaKeys: AlpacaKeys | null;
   setAlpacaKeys: (keys: AlpacaKeys) => void;
@@ -28,6 +34,12 @@ interface AppState {
   
   isSettingsOpen: boolean;
   setSettingsOpen: (isOpen: boolean) => void;
+
+  selectedSymbol: string | null;
+  setSelectedSymbol: (symbol: string | null) => void;
+
+  riskControls: RiskControls;
+  setRiskControls: (controls: RiskControls) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -58,6 +70,16 @@ export const useStore = create<AppState>()(
         
       isSettingsOpen: false,
       setSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
+
+      selectedSymbol: null,
+      setSelectedSymbol: (symbol) => set({ selectedSymbol: symbol }),
+
+      riskControls: {
+        maxPosPct: 20.0,
+        dailyLossLimit: 3.0,
+        maxDrawdownLimit: 15.0,
+      },
+      setRiskControls: (controls) => set({ riskControls: controls }),
     }),
     {
       name: 'quant-trader-storage',
