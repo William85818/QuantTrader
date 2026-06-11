@@ -1,0 +1,19 @@
+# --- 交易帳戶設定 ---
+initial_capital: 1000000
+
+# --- 交易成本設定 (台股預設) ---
+fee_rate: 0.001425      # 券商手續費 (0.1425%)
+fee_discount: 0.28      # 手續費折扣 (如 28 折)
+tax_rate: 0.003         # 證交稅 (0.3%，賣出收取)
+slippage_rate: 0.0005   # 預期滑價 (0.05%)
+
+# --- 策略參數 ---
+short_window: 20
+long_window: 60
+
+# --- 風控中心設定 ---
+max_position_pct: 0.2           # 單一標的最大持倉比例 (20%)
+max_daily_loss_pct: 0.03        # 單日帳戶最大損失比例 (3%)
+max_total_drawdown_pct: 0.15    # 總資產容許最大回撤 (15%)
+max_order_value: 500000         # 單筆最大下單金額
+allow_trading: false            # 實盤下單開關 (預設關閉)

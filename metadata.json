@@ -1,0 +1,6 @@
+{
+  "name": "Quant Trader MVP",
+  "description": "一個基於 Python 的台股量化交易回測系統 MVP，支援均線交叉策略、風控管理與詳細績效統計。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
